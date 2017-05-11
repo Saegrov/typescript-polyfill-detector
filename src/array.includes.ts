@@ -1,3 +1,2 @@
-let array: Array<String> = ['a', 'b'];
-
-console.log(array.includes('a'));
+let foobar: Array<number> = [111, 222, 333];
+console.log(foobar.includes(111));
