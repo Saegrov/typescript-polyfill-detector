@@ -13,10 +13,7 @@ interface PropertyAccessExpressionHiddenApi extends PropertyAccessExpression {
 }
 
 const features = {
-  ArrayIncludes: {
-    name: 'Array.prototype.includes()',
-    used: false
-  }
+  'Array.prototype.includes': false
 };
 
 const entryPoint = process.argv.slice(2)[0];
@@ -35,13 +32,12 @@ for (const sourceFile of sourceFiles) {
   ts.forEachChild(sourceFile, visit);
 }
 
-// print out the doc
+// Print out the features JSON.
 fs.writeFileSync(output, JSON.stringify(features, undefined, 2));
-// console.log('Project uses "Array.includes":', features.ArrayIncludes.used);
 
 function visit (node: ts.Node) {
   if (ifNodeIsArrayIncludes(<PropertyAccessExpressionHiddenApi>node)) {
-    features.ArrayIncludes.used = true;
+    features['Array.prototype.includes'] = true;
   }
 
   ts.forEachChild(node, visit);
@@ -52,14 +48,16 @@ function ifNodeIsArrayIncludes (node: PropertyAccessExpressionHiddenApi): boolea
     return false;
   }
 
-  const nodeName = node.name.text;
+  if (typeof node.expression.flowNode === 'undefined') {
+    return false;
+  }
 
+  const nodeName = node.name.text;
   if (nodeName !== 'includes' || typeof node.expression.flowNode === 'undefined') {
     return false;
   }
 
   const leftHandSideExpression = node.expression.flowNode.node;
-
   if (typeof leftHandSideExpression === 'undefined') {
     return false;
   }
