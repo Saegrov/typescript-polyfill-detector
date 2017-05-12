@@ -1,13 +1,17 @@
-var missingFeatures = [];
+{% if usesAnyFeatures %}
+  <script>
+    var missingFeatures = [];
 
-{% if features['Array.prototype.includes'] %}
-  if (!Array.prototype.includes) {
-    missingFeatures.push('Array.prototype.includes');
-  }
+    {% if features['Array.prototype.includes'] %}
+      if (!Array.prototype.includes) {
+        missingFeatures.push('Array.prototype.includes');
+      }
+    {% endif %}
+
+    if (missingFeatures.length > 0) {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.polyfill.io/v2/polyfill.js?features=' + missingFeatures.join(',') + '|always'
+      document.getElementsByTagName('head')[0].appendChild(script);
+    }
+  </script>
 {% endif %}
-
-if (missingFeatures.length > 0) {
-  var script = document.createElement('script');
-  script.src = 'https://cdn.polyfill.io/v2/polyfill.js?features=' + missingFeatures.join(',') + '|always'
-  document.getElementsByTagName('head')[0].appendChild(script);
-}
