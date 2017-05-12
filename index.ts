@@ -1,6 +1,16 @@
 import * as ts from 'typescript';
 import * as fs from 'fs';
-import { PropertyAccessExpression } from 'typescript';
+import { LeftHandSideExpression, PropertyAccessExpression } from 'typescript';
+
+interface LeftHandSideExpressionHiddenApi extends LeftHandSideExpression {
+  flowNode: {
+    node: any
+  }
+}
+
+interface PropertyAccessExpressionHiddenApi extends PropertyAccessExpression {
+  expression: LeftHandSideExpressionHiddenApi
+}
 
 const features = {
   ArrayIncludes: {
@@ -30,15 +40,21 @@ fs.writeFileSync(output, JSON.stringify(features, undefined, 2));
 // console.log('Project uses "Array.includes":', features.ArrayIncludes.used);
 
 function visit (node: ts.Node) {
-  if (ifNodeIsArrayIncludes(<PropertyAccessExpression>node) === true) {
+  if (ifNodeIsArrayIncludes(<PropertyAccessExpressionHiddenApi>node)) {
     features.ArrayIncludes.used = true;
   }
 
   ts.forEachChild(node, visit);
 }
 
-function ifNodeIsArrayIncludes (node: ts.PropertyAccessExpression): boolean {
+function ifNodeIsArrayIncludes (node: PropertyAccessExpressionHiddenApi): boolean {
   if (node.kind !== ts.SyntaxKind.PropertyAccessExpression) {
+    return false;
+  }
+
+  const nodeName = node.name.text;
+
+  if (nodeName !== 'includes' || typeof node.expression.flowNode === 'undefined') {
     return false;
   }
 
@@ -48,11 +64,9 @@ function ifNodeIsArrayIncludes (node: ts.PropertyAccessExpression): boolean {
     return false;
   }
 
-  const nodeName = node.name.text;
-
   // We need to use the typeName text to find out if the node is of type "Array"
   // See http://stackoverflow.com/a/39359772
   const leftHandSideExpressionName = leftHandSideExpression.type.typeName.text;  // Or `leftHandSideExpression.type.getText()`
 
-  return nodeName === 'includes' && leftHandSideExpressionName === 'Array';
+  return leftHandSideExpressionName === 'Array';
 }
