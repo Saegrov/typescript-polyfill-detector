@@ -5,28 +5,38 @@ import { Identifier, PropertyAccessExpression, SourceFile } from 'typescript';
 declare var process: any;
 declare var console: { log: Function, error: Function };
 
-const enum DetectableFeatures {
-  ArrayIncludes = 0
+const features = {
+  ArrayIncludes: {
+    name: 'Array.prototype.includes()',
+    used: false
+  }
 };
 
-const detectedFeatures = {};
+const entryPoint = process.argv.slice(2)[0]
+const output = process.argv.slice(3)[0]
 
-const program = ts.createProgram(process.argv.slice(2), { });
+if (!entryPoint || !output) {
+  console.log('Usage: test.ts entryPoint output');
+  process.exit();
+}
+
+const program = ts.createProgram([entryPoint], { });
 const sourceFiles = program.getSourceFiles();
-console.log('sourceFiles', sourceFiles.map(f => f.fileName));
 
 let checker = program.getTypeChecker();
 
 // Visit every sourceFile in the program.
 for (const sourceFile of sourceFiles) {
-    ts.forEachChild(sourceFile, visit);
+  ts.forEachChild(sourceFile, visit);
 }
 
-console.log('Project uses "Array.includes":', Boolean(detectedFeatures[DetectableFeatures.ArrayIncludes]));
+// print out the doc
+fs.writeFileSync(output, JSON.stringify(features, undefined, 2));
+// console.log('Project uses "Array.includes":', features.ArrayIncludes.used);
 
 function visit (node: ts.Node) {
   if (ifNodeIsArrayIncludes(node) === true) {
-    detectedFeatures[DetectableFeatures.ArrayIncludes] = true;
+    features.ArrayIncludes.used = true;
   }
 
   ts.forEachChild(node, visit);
