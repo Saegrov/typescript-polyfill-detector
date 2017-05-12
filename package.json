@@ -4,11 +4,14 @@
   "description": "A library for detecting polyfills needed",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "tsc": "node_modules/.bin/tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile-includes": "tsc index.ts; node index.js input-files/array.includes.ts output-include.json",
+    "compile-no-includes": "tsc index.ts && node index.js input-files/array.ts output-no-include.json"
   },
   "dependencies": {
-    "@types/node": "^7.0.18",
-    "nunjucks": "^3.0.0",
-    "typescript": "^2.3.2"
+    "@types/node": "7.0.18",
+    "typescript": "2.3.2",
+    "nunjucks": "^3.0.0"
   }
 }
