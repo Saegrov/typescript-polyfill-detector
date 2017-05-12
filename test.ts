@@ -1,9 +1,6 @@
-import * as ts from "typescript";
-import * as fs from "fs";
-import { Identifier, PropertyAccessExpression, SourceFile } from 'typescript';
-
-declare var process: any;
-declare var console: { log: Function, error: Function };
+import * as ts from 'typescript';
+import * as fs from 'fs';
+import { PropertyAccessExpression } from 'typescript';
 
 const features = {
   ArrayIncludes: {
@@ -12,18 +9,16 @@ const features = {
   }
 };
 
-const entryPoint = process.argv.slice(2)[0]
-const output = process.argv.slice(3)[0]
+const entryPoint = process.argv.slice(2)[0];
+const output = process.argv.slice(3)[0];
 
 if (!entryPoint || !output) {
   console.log('Usage: test.ts entryPoint output');
   process.exit();
 }
 
-const program = ts.createProgram([entryPoint], { });
+const program = ts.createProgram([entryPoint], {});
 const sourceFiles = program.getSourceFiles();
-
-let checker = program.getTypeChecker();
 
 // Visit every sourceFile in the program.
 for (const sourceFile of sourceFiles) {
@@ -35,14 +30,14 @@ fs.writeFileSync(output, JSON.stringify(features, undefined, 2));
 // console.log('Project uses "Array.includes":', features.ArrayIncludes.used);
 
 function visit (node: ts.Node) {
-  if (ifNodeIsArrayIncludes(node) === true) {
+  if (ifNodeIsArrayIncludes(<PropertyAccessExpression>node) === true) {
     features.ArrayIncludes.used = true;
   }
 
   ts.forEachChild(node, visit);
 }
 
-function ifNodeIsArrayIncludes(node) {
+function ifNodeIsArrayIncludes (node: ts.PropertyAccessExpression): boolean {
   if (node.kind !== ts.SyntaxKind.PropertyAccessExpression) {
     return false;
   }
