@@ -6,8 +6,10 @@
   "scripts": {
     "tsc": "node_modules/.bin/tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile-includes": "tsc index.ts; node index.js input-files/array.includes.ts output-include.json",
-    "compile-no-includes": "tsc index.ts && node index.js input-files/array.ts output-no-include.json"
+    "compile-includes": "tsc index.ts && node index.js input-files/array.includes.ts output-includes.json",
+    "compile-no-includes": "tsc index.ts && node index.js input-files/array.ts output-no-includes.json",
+    "demo-includes": "node demos/demo-includes.js",
+    "demo-no-includes": "node demos/demo-no-includes.js"
   },
   "dependencies": {
     "@types/node": "7.0.18",
